@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 NOAPS Aero Configuration</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: #64748b;
+        }
+        
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid;
+        }
+        
+        .card.blue { border-left-color: #3b82f6; }
+        .card.red { border-left-color: #ef4444; }
+        .card.green { border-left-color: #10b981; }
+        .card.amber { border-left-color: #f59e0b; }
+        
+        .card-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1e293b;
+        }
+        
+        .charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-container h2 {
+            font-size: 1.25rem;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .table-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .table-header h2 {
+            font-size: 1.25rem;
+            color: #1e293b;
+        }
+        
+        select {
+            padding: 0.5rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        
+        select:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: #f1f5f9;
+        }
+        
+        th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+        }
+        
+        td {
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            color: #1e293b;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-ss { background: #dbeafe; color: #1e40af; }
+        .badge-int { background: #d1fae5; color: #065f46; }
+        .badge-st { background: #fee2e2; color: #991b1b; }
+        .badge-rc { background: #fef3c7; color: #92400e; }
+        
+        .check { color: #10b981; font-weight: bold; }
+        .dash { color: #cbd5e1; }
+        
+        .insights {
+            background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #c7d2fe;
+        }
+        
+        .insights h2 {
+            font-size: 1.25rem;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+        
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .insight-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        
+        .insight-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .insight-value {
+            font-size: 1.125rem;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        
+        canvas {
+            max-width: 100%;
+            height: auto !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>2026 NOAPS Aero Configuration</h1>
+            <p>NOAPS Schedule and Aero Configuration Breakdown</p>
+        </div>
+        
+        <div class="cards">
+            <div class="card blue">
+                <div class="card-label">Total Races</div>
+                <div class="card-value" id="totalRaces">-</div>
+            </div>
+            <div class="card red">
+                <div class="card-label">Track Types</div>
+                <div class="card-value" id="trackTypes">-</div>
+            </div>
+            <div class="card green">
+                <div class="card-label">With Brake Ducts</div>
+                <div class="card-value" id="brakeDucts">-</div>
+            </div>
+            <div class="card amber">
+                <div class="card-label">With RS Window</div>
+                <div class="card-value" id="rsWindow">-</div>
+            </div>
+        </div>
+        
+        <div class="charts">
+            <div class="chart-container">
+                <h2>Track Types Distribution</h2>
+                <div class="chart-wrapper">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h2>Aero Configuration Usage</h2>
+                <div class="chart-wrapper">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- New Aero Configuration Details Table -->
+        <div class="table-section" style="margin-bottom: 2rem;">
+            <h2 style="margin-bottom: 1.5rem;">Aero Configuration Breakdown</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Configuration</th>
+                            <th>Brake Ducts</th>
+                            <th>RS Window</th>
+                            <th>Count</th>
+                            <th>Percentage</th>
+                            <th>Example Tracks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="configBreakdownBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="table-section">
+            <div class="table-header">
+                <h2>Race Schedule Details</h2>
+                <select id="filterSelect">
+                    <option value="all">All Track Types</option>
+                    <option value="SS">Superspeedway</option>
+                    <option value="INT">Intermediate</option>
+                    <option value="ST">Short Track</option>
+                    <option value="RC">Road Course</option>
+                </select>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="raceTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Track</th>
+                            <th>Type</th>
+                            <th>Length</th>
+                            <th>Engine</th>
+                            <th>Brake Ducts</th>
+                            <th>RS Window</th>
+                            <th>Rear Travel</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="insights">
+            <h2>📊 Key Insights</h2>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-label">Most Common Track Type</div>
+                    <div class="insight-value" id="mostCommon">-</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-label">Brake Duct Usage</div>
+                    <div class="insight-value" id="brakeDuctRate" style="color: #10b981;">-</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-label">RS Window Usage</div>
+                    <div class="insight-value" id="rsWindowRate" style="color: #3b82f6;">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data from the Excel file - CORRECTED
+        const raceData = [
+            {race_num: 1, track: "Daytona", type: "SS", length: 2.5, engine: "SS", brake_ducts: "", rs_window: "YES", rear_travel: "", config_both_in: "", config_duct_in_window_out: "", config_duct_out_window_in: "YES"},
+            {race_num: 2, track: "Atlanta", type: "INT", length: 1.54, engine: "SS", brake_ducts: "", rs_window: "YES", rear_travel: "YES", config_both_in: "", config_duct_in_window_out: "", config_duct_out_window_in: "YES"},
+            {race_num: 3, track: "COTA", type: "RC", length: 2.4, engine: "", brake_ducts: "YES", rs_window: "", rear_travel: "", config_both_in: "", config_duct_in_window_out: "YES", config_duct_out_window_in: ""},
+            {race_num: 4, track: "Phoenix", type: "ST", length: 1, engine: "", brake_ducts: "YES", rs_window: "", rear_travel: "", config_both_in: "", config_duct_in_window_out: "YES", config_duct_out_window_in: ""},
+            {race_num: 5, track: "Las Vegas", type: "INT", length: 1.5, engine: "", brake_ducts: "", rs_window: "YES", rear_travel: "", config_both_in: "", config_duct_in_window_out: "", config_duct_out_window_in: "YES"},
+            {race_num: 6, track: "Darlington", type: "INT", length: 1.365, engine: "", brake_ducts: "YES", rs_window: "YES", rear_travel: "", config_both_in: "YES", config_duct_in_window_out: "", config_duct_out_window_in: ""},
+            {race_num: 7, track: "Martinsville", type: "ST", length: 0.526, engine: "", brake_ducts: "YES", rs_window: "", rear_travel: "", config_both_in: "", config_duct_in_window_out: "YES", config_duct_out_window_in: ""},
+            {race_num: 8, track: "Rockingham", type: "ST", length: 0.94, engine: "", brake_ducts: "YES", rs_window: "", rear_travel: "", config_both_in: "", config_duct_in_window_out: "YES", config_duct_out_window_in: ""},
+            {race_num: 9, track: "Bristol", type: "ST", length: 0.533, engine: "", brake_ducts: "YES", rs_window: "", rear_travel: "", config_both_in: "", config_duct_in_window_out: "YES", config_duct_out_window_in: ""},
+            {race_num: 10, track: "Kansas", type: "INT", length: 1.5, engine: "", brake_ducts: "", rs_window: "YES", rear_travel: "", config_both_in: "", config_duct_in_window_out: "", config_duct_out_window_in: "YES"},
+            {race_num: 11, track: "Talladega", type: "SS", length: 2.66, engine: "SS", brake_ducts: "", rs_window: "YES", rear_travel: "", config_both_in: "", config_duct_in_window_out: "", config_duct_out_window_in: "YES"},
+            {race_num: 12, track: "Texas", type: "INT", length: 1.5, engine: "", brake_ducts: "", rs_window: "YES", rear_travel: "", config_both_in: "", config_duct_in_window_out: "", config_duct_out_window_in: "YES"},
+            {race_num: 13, track: "Watkins Glen", type: "RC", length: 2.45, engine: "", brake_ducts: "YES", rs_window: "", rear_travel: "", config_both_in: "", config_duct_in_window_out: "YES", config_duct_out_window_in: ""},
+            {race_num: 14, track: "Dover", type: "ST", length: 1, engine: "", brake_ducts: "YES", rs_window: "", rear_travel: "", config_both_in: "", config_duct_in_window_out: "YES", config_duct_out_window_in: ""},
+            {race_num: 15, track: "Charlotte", type: "INT", length: 1.5, engine: "", brake_ducts: "", rs_window: "YES", rear_travel: "", config_both_in: "", config_duct_in_window_out: "", config_duct_out_window_in: "YES"},
+            {race_num: 16, track: "Nashville", type: "INT", length: 1.33, engine: "", brake_ducts: "YES", rs_window: "YES", rear_travel: "", config_both_in: "YES", config_duct_in_window_out: "", config_duct_out_window_in: ""},
+            {race_num: 17, track: "Pocono", type: "INT", length: 2.5, engine: "", brake_ducts: "YES", rs_window: "YES", rear_travel: "", config_both_in: "YES", config_duct_in_window_out: "", config_duct_out_window_in: ""},
+            {race_num: 18, track: "San Diego", type: "RC", length: 3.4, engine: "", brake_ducts: "YES", rs_window: "", rear_travel: "", config_both_in: "", config_duct_in_window_out: "YES", config_duct_out_window_in: ""},
+            {race_num: 19, track: "Sonoma", type: "RC", length: 1.99, engine: "", brake_ducts: "YES", rs_window: "", rear_travel: "", config_both_in: "", config_duct_in_window_out: "YES", config_duct_out_window_in: ""},
+            {race_num: 20, track: "Chicagoland", type: "INT", length: 1.5, engine: "", brake_ducts: "", rs_window: "YES", rear_travel: "", config_both_in: "", config_duct_in_window_out: "", config_duct_out_window_in: "YES"},
+            {race_num: 21, track: "Atlanta 2", type: "INT", length: 1.54, engine: "SS", brake_ducts: "", rs_window: "YES", rear_travel: "YES", config_both_in: "", config_duct_in_window_out: "", config_duct_out_window_in: "YES"},
+            {race_num: 22, track: "Indy", type: "INT", length: 2.5, engine: "SS", brake_ducts: "", rs_window: "YES", rear_travel: "YES", config_both_in: "", config_duct_in_window_out: "", config_duct_out_window_in: "YES"},
+            {race_num: 23, track: "Iowa", type: "ST", length: 0.875, engine: "", brake_ducts: "YES", rs_window: "", rear_travel: "", config_both_in: "", config_duct_in_window_out: "YES", config_duct_out_window_in: ""},
+            {race_num: 24, track: "Daytona 2", type: "SS", length: 2.5, engine: "SS", brake_ducts: "", rs_window: "YES", rear_travel: "", config_both_in: "", config_duct_in_window_out: "", config_duct_out_window_in: "YES"},
+            {race_num: 25, track: "Darlington 2", type: "INT", length: 1.365, engine: "", brake_ducts: "YES", rs_window: "YES", rear_travel: "", config_both_in: "YES", config_duct_in_window_out: "", config_duct_out_window_in: ""},
+            {race_num: 26, track: "Gateway", type: "ST", length: 1.25, engine: "", brake_ducts: "YES", rs_window: "", rear_travel: "", config_both_in: "", config_duct_in_window_out: "YES", config_duct_out_window_in: ""},
+            {race_num: 27, track: "Bristol 2", type: "ST", length: 0.533, engine: "", brake_ducts: "YES", rs_window: "", rear_travel: "", config_both_in: "", config_duct_in_window_out: "YES", config_duct_out_window_in: ""},
+            {race_num: 28, track: "Las Vegas 2", type: "INT", length: 1.5, engine: "", brake_ducts: "", rs_window: "YES", rear_travel: "", config_both_in: "", config_duct_in_window_out: "", config_duct_out_window_in: "YES"},
+            {race_num: 29, track: "Charlotte", type: "INT", length: 1.5, engine: "", brake_ducts: "", rs_window: "YES", rear_travel: "", config_both_in: "", config_duct_in_window_out: "", config_duct_out_window_in: "YES"},
+            {race_num: 30, track: "Phoenix 2", type: "ST", length: 1, engine: "", brake_ducts: "YES", rs_window: "", rear_travel: "", config_both_in: "", config_duct_in_window_out: "YES", config_duct_out_window_in: ""},
+            {race_num: 31, track: "Talladega 2", type: "SS", length: 2.66, engine: "SS", brake_ducts: "", rs_window: "YES", rear_travel: "", config_both_in: "", config_duct_in_window_out: "", config_duct_out_window_in: "YES"},
+            {race_num: 32, track: "Martinsville 2", type: "ST", length: 0.526, engine: "", brake_ducts: "YES", rs_window: "", rear_travel: "", config_both_in: "", config_duct_in_window_out: "YES", config_duct_out_window_in: ""},
+            {race_num: 33, track: "Homestead", type: "INT", length: 1.5, engine: "", brake_ducts: "YES", rs_window: "YES", rear_travel: "", config_both_in: "YES", config_duct_in_window_out: "", config_duct_out_window_in: ""}
+        ];
+
+        let currentFilter = 'all';
+        
+        // Calculate metrics
+        function updateMetrics() {
+            const totalRaces = raceData.length;
+            const trackTypes = new Set(raceData.map(r => r.type)).size;
+            const brakeDucts = raceData.filter(r => r.brake_ducts === 'YES').length;
+            const rsWindow = raceData.filter(r => r.rs_window === 'YES').length;
+            
+            document.getElementById('totalRaces').textContent = totalRaces;
+            document.getElementById('trackTypes').textContent = trackTypes;
+            document.getElementById('brakeDucts').textContent = brakeDucts;
+            document.getElementById('rsWindow').textContent = rsWindow;
+            
+            // Insights
+            const typeCount = {};
+            raceData.forEach(r => {
+                typeCount[r.type] = (typeCount[r.type] || 0) + 1;
+            });
+            const mostCommon = Object.entries(typeCount).sort((a, b) => b[1] - a[1])[0];
+            const typeNames = {
+                'SS': 'Superspeedway',
+                'INT': 'Intermediate',
+                'ST': 'Short Track',
+                'RC': 'Road Course',
+                'TRI': 'Triangle'
+            };
+            document.getElementById('mostCommon').textContent = `${typeNames[mostCommon[0]]} (${mostCommon[1]} races)`;
+            document.getElementById('brakeDuctRate').textContent = `${brakeDucts} races (${((brakeDucts / totalRaces) * 100).toFixed(1)}%)`;
+            document.getElementById('rsWindowRate').textContent = `${rsWindow} races (${((rsWindow / totalRaces) * 100).toFixed(1)}%)`;
+        }
+        
+        // Create charts
+        function createCharts() {
+            const typeCount = {};
+            raceData.forEach(r => {
+                typeCount[r.type] = (typeCount[r.type] || 0) + 1;
+            });
+            
+            const typeNames = {
+                'SS': 'Superspeedway',
+                'INT': 'Intermediate',
+                'ST': 'Short Track',
+                'RC': 'Road Course',
+                'TRI': 'Triangle'
+            };
+            
+            // Pie Chart
+            new Chart(document.getElementById('pieChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(typeCount).map(k => typeNames[k] || k),
+                    datasets: [{
+                        data: Object.values(typeCount),
+                        backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} races (${percentage}%)`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            color: '#fff',
+                            font: {
+                                weight: 'bold',
+                                size: 14
+                            },
+                            formatter: function(value, context) {
+                                return value;
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+            
+            // Bar Chart
+            const configBothIn = raceData.filter(r => r.config_both_in === 'YES').length;
+            const configDuctInWindowOut = raceData.filter(r => r.config_duct_in_window_out === 'YES').length;
+            const configDuctOutWindowIn = raceData.filter(r => r.config_duct_out_window_in === 'YES').length;
+            
+            new Chart(document.getElementById('barChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Both IN', 'Duct IN,\nWindow OUT', 'Duct OUT,\nWindow IN'],
+                    datasets: [{
+                        label: 'Number of Races',
+                        data: [configBothIn, configDuctInWindowOut, configDuctOutWindowIn],
+                        backgroundColor: '#3b82f6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 20,
+                            ticks: {
+                                stepSize: 2
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#1e293b',
+                            font: {
+                                weight: 'bold',
+                                size: 16
+                            },
+                            formatter: function(value) {
+                                return value;
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+        
+        // Update table
+        function updateTable() {
+            const filteredData = currentFilter === 'all' 
+                ? raceData 
+                : raceData.filter(r => r.type === currentFilter);
+            
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            filteredData.forEach(race => {
+                const tr = document.createElement('tr');
+                
+                const badgeClass = {
+                    'SS': 'badge-ss',
+                    'INT': 'badge-int',
+                    'ST': 'badge-st',
+                    'RC': 'badge-rc',
+                    'TRI': 'badge-rc'
+                }[race.type] || 'badge-ss';
+                
+                tr.innerHTML = `
+                    <td>${race.race_num}</td>
+                    <td style="font-weight: 500;">${race.track}</td>
+                    <td><span class="badge ${badgeClass}">${race.type}</span></td>
+                    <td>${race.length} mi</td>
+                    <td>${race.engine || '-'}</td>
+                    <td><span class="${race.brake_ducts === 'YES' ? 'check' : 'dash'}">${race.brake_ducts === 'YES' ? '✓' : '-'}</span></td>
+                    <td><span class="${race.rs_window === 'YES' ? 'check' : 'dash'}">${race.rs_window === 'YES' ? '✓' : '-'}</span></td>
+                    <td><span class="${race.rear_travel === 'YES' ? 'check' : 'dash'}">${race.rear_travel === 'YES' ? '✓' : '-'}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        // Event listener for filter
+        document.getElementById('filterSelect').addEventListener('change', (e) => {
+            currentFilter = e.target.value;
+            updateTable();
+        });
+        
+        // Initialize
+        updateMetrics();
+        createCharts();
+        updateTable();
+        updateConfigBreakdown();
+        
+        function updateConfigBreakdown() {
+            const tbody = document.getElementById('configBreakdownBody');
+            tbody.innerHTML = '';
+            
+            // Define all possible configurations
+            const configs = [
+                { name: 'Both IN', brake: 'YES', window: 'YES', key: 'config_both_in' },
+                { name: 'Duct IN, Window OUT', brake: 'YES', window: '', key: 'config_duct_in_window_out' },
+                { name: 'Duct OUT, Window IN', brake: '', window: 'YES', key: 'config_duct_out_window_in' },
+                { name: 'Both OUT', brake: '', window: '', key: 'none' }
+            ];
+            
+            configs.forEach(config => {
+                let races;
+                if (config.key === 'none') {
+                    races = raceData.filter(r => r.brake_ducts !== 'YES' && r.rs_window !== 'YES');
+                } else {
+                    races = raceData.filter(r => r[config.key] === 'YES');
+                }
+                
+                const count = races.length;
+                const percentage = ((count / raceData.length) * 100).toFixed(1);
+                const exampleTracks = races.slice(0, 3).map(r => r.track).join(', ');
+                const moreText = races.length > 3 ? ` +${races.length - 3} more` : '';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight: 600;">${config.name}</td>
+                    <td><span class="${config.brake === 'YES' ? 'check' : 'dash'}">${config.brake === 'YES' ? '✓' : '-'}</span></td>
+                    <td><span class="${config.window === 'YES' ? 'check' : 'dash'}">${config.window === 'YES' ? '✓' : '-'}</span></td>
+                    <td style="font-weight: 600;">${count}</td>
+                    <td>${percentage}%</td>
+                    <td style="font-size: 0.8rem; color: #64748b;">${exampleTracks}${moreText}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
